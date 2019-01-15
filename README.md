@@ -1,5 +1,5 @@
 # Ubuntu 18.04 CIS Benchmark for Ansible
-Ansible role that configures Ubuntu 18.04 to CIS Benchmark v1.1.0
+Ansible role that configures Ubuntu 18.04 to CIS Benchmark v1.1.0 - https://www.cisecurity.org/benchmark/ubuntu_linux/
 
 ## Requirements
 Ansible 2.3+
