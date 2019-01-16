@@ -80,9 +80,9 @@
 
 - name: 1.1.16 Ensure noexec option set on /dev/shm partition (Scored)
   mount:
-    path: tmpfs
-    src: /dev/shm
+    path: /dev/shm
+    src: tmpfs
     fstype: tmpfs
     opts: rw,nosuid,nodev,noexec
-    state: present
+    state: mounted
     
