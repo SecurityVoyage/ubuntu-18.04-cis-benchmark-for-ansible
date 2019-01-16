@@ -1,0 +1,16 @@
+galaxy_info:
+  author: Dominic Pace
+  description: Ansible role that configures Ubuntu 18.04 to CIS Benchmark v1.1.0
+  company: PaxDominicus
+  license: GPLv3
+  min_ansible_version: 2.4
+  platforms:
+  - name: Ubuntu
+    versions:
+      - bionic
+  galaxy_tags:
+    - cis
+    - ubuntu
+    - security
+    - hardening
+dependencies: []

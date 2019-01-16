@@ -1,0 +1,5 @@
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - ubuntu-18.04-cis-benchmark-for-ansible
