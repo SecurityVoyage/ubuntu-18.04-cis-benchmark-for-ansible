@@ -1,0 +1,11 @@
+---
+
+  - name: Check if Ansible version is 2.4+
+    debug:
+      msg: "Check if Ansible version is 2.4+"
+    failed_when: not ansible_version.full is version('2.4', '>=')
+
+  - name: Check if OS is Ubuntu 18.04 (Bionic Beaver)
+    debug:
+      msg: "Check if OS is Ubuntu 18.04 (Bionic Beaver)"
+    failed_when: ansible_distribution != "Ubuntu" and ansible_distribution_version !="18.04"

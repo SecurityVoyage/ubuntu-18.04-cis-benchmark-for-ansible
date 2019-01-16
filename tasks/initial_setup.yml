@@ -1,0 +1,88 @@
+---
+
+- name: 1.1.1.1 Ensure mounting of cramfs filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install cramfs /bin/true'
+    state: present
+    create: yes
+
+- name: 1.1.1.2 Ensure mounting of freevxfs filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install freevxfs /bin/true'
+    state: present
+    create: yes
+
+- name: 1.1.1.3 Ensure mounting of jffs2 filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install jffs2 /bin/true'
+    state: present
+    create: yes
+
+- name: 1.1.1.4 Ensure mounting of hfs filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install hfs /bin/true'
+    state: present
+    create: yes
+
+- name: 1.1.1.5 Ensure mounting of hfsplus filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install hfsplus /bin/true'
+    state: present
+    create: yes
+
+- name: 1.1.1.6 Ensure mounting of udf filesystems is disabled (Scored)
+  lineinfile:
+    path: /etc/modprobe.d/filesystem-blacklist.conf
+    line: 'install udf /bin/true'
+    state: present
+    create: yes
+
+# -name: 1.1.2 Ensure separate partition exists for /tmp (Scored)
+# This must be completed manually.
+
+# -name: 1.1.3 Ensure nodev option set on /tmp partition (Scored)
+# This must be completed manually.
+
+# -name: 1.1.4 Ensure nosuid option set on /tmp partition (Scored)
+# This must be completed manually.
+
+# -name: 1.1.5 Ensure separate partition exists for /var (Scored)
+# This must be completed manually.
+
+# -name: 1.1.6 Ensure separate partition exists for /var/tmp (Scored)
+# This must be completed manually.
+
+# -name: 1.1.7 Ensure nodev option set on /var/tmp partition (Scored)
+# This must be completed manually.
+
+# -name: 1.1.8 Ensure nosuid option set on /var/tmp partition (Scored)
+# This must be completed manually.
+
+# -name: 1.1.9 Ensure noexec option set on /var/tmp partition (Scored)
+# This must be completed manually.
+
+# -name: 1.1.10 Ensure separate partition exists for /var/log (Scored)
+# This must be completed manually.
+
+# -name: 1.1.11 Ensure separate partition exists for /var/log/audit (Scored)
+# This must be completed manually.
+
+# -name: 1.1.12 Ensure separate partition exists for /home (Scored)
+# This must be completed manually.
+
+# -name: 1.1.13 Ensure nodev option set on /home partition (Scored)
+# This must be completed manually.
+
+- name: 1.1.16 Ensure noexec option set on /dev/shm partition (Scored)
+  mount:
+    path: tmpfs
+    src: /dev/shm
+    fstype: tmpfs
+    opts: rw,nosuid,nodev,noexec
+    state: present
+    

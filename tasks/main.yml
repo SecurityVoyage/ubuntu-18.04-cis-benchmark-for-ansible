@@ -1,2 +1,25 @@
 ---
 # tasks file for ubuntu-18.04-cis-benchmark-for-ansible
+
+- include: preliminary_checks.yml
+
+- include: initial_setup.yml
+  when: initial_setup
+
+- include: services.yml
+  when: services
+
+- include: network_configuration.yml
+  when: network_configuration
+
+- include: logging_and_auditing.yml
+  when: logging_and_auditing
+
+- include: access_authentication_and_authorizatoin.yml
+  when: access_authentication_and_authorizatoin
+
+- include: system_maintenance.yml
+  when: system_maintenance
+
+- include: extras.yml
+  when: extras

@@ -1,2 +1,13 @@
 ---
 # defaults file for ubuntu-18.04-cis-benchmark-for-ansible
+
+# Benchmark Sections
+initial_setup: true
+services: false
+network_configuration: false
+logging_and_auditing: false
+access_authentication_and_authorizatoin: false
+system_maintenance: false
+
+# This is an optional set of task that furture secure the OS' configuraiton beyond CIS' benchmarks (default = false).
+extras: false
