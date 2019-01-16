@@ -1,2 +1,7 @@
 ---
 # handlers file for ubuntu-18.04-cis-benchmark-for-ansible
+
+- name: update grub
+  command: update-grub
+  changed_when: False
+  ignore_errors: True
