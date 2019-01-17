@@ -10,10 +10,13 @@ level: 2
 # Enable AIDE Filesystem Integrity Checking - Set to 'true' or 'false' (default = true)
 enable_aide: true
 
-# Set GRUB Password - Set custom password by using the command 'grub-mkpasswd-pbkdf2' in Linux. The password below is for example purposes only.
+# Set GRUB Superuser - Specify the superuser for GRUB (default = ubuntu)
+grub_superuser: ubuntu
+
+# Set GRUB Password - Set the password for the GRUB superuser by using the command 'grub-mkpasswd-pbkdf2' in Linux to generate a new password. The password below is for example purposes only.
 grub_password: grub.pbkdf2.sha512.10000.A1071BDA678E7DCE0B44D03B717F9ADE8856E9B4C4443D261E95C98FDE010E3B9C9AABF4C721F2FA42B0E6E482EA0C61AEC68971009609935D013B71554B9EA0.CEC99F94863E3CF28FBA76F96FEF58894E2F41891CECD0B28A0D088A46C4EDA4FF607E18D73A78830FF39BE14CB9BBE5F5D4CA7D11B03ACFE2071531FF1C3A06
 
-# Set ROOT Password - Set custom root password or leave it set to 'disabled' to skip this benchmark (default = disabled).
+# Set ROOT Password - Set the root password or leave it set to 'disabled' to skip this benchmark (default = disabled).
 root_password: disabled
 
 # Enable Mandatory Access Contorl - Set to 'selinux', 'apparmor', or 'disabled' (default = apparmor).

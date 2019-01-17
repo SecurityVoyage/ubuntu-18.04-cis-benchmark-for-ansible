@@ -149,12 +149,8 @@
 
 - name: 1.3.1 Ensure AIDE is installed (Scored)
   apt:
-    name: name: "{{ packages }}"
+    name: ['aide', 'aide-common']
     state: present
-  vars:
-    packages:
-    - aide
-    - aide-common
   when: enable_aide == True
 
 - name: 1.3.2 Ensure filesystem integrity is regularly checked (Scored)
@@ -172,9 +168,18 @@
     group: root
     mode: 0600
 
-# FIX BELOW
-#- name: 1.4.2 Ensure bootloader password is set (Scored)
-# FIX ABOVE
+- name: 1.4.2 Ensure bootloader password is set (Scored)
+  lineinfile:
+      path: /etc/grub.d/40_custom
+      regexp: '^{{ item.name }}'
+      line: '{{ item.name }}{{ item.value }} {{ item.value2 }}'
+      state: present
+      insertafter: EOF
+  with_items:
+    - { name: 'set superusers=' , value: '"root"' , value2: '' }
+    - { name: 'password_pbkdf2 ' , value: 'root' , value2: '{{ grub_password }}' }
+  notify: update grub
+  when: boot_password.rc == 1
 
 - name: 1.4.3 Ensure authentication required for single user mode (Scored)
   command: grep "^root:[*\!]:" /etc/shadow
@@ -225,6 +230,8 @@
 - name: 1.5.4 Ensure prelink is disabled (Scored)
   shell: 'prelink -ua'
   ignore_errors: True
+  args:
+    warn: False
 
 - name: 1.5.4 Ensure prelink is disabled (Scored)
   apt:
@@ -233,16 +240,24 @@
 
 - name: 1.6.3 Ensure SELinux or AppArmor are installed (Not Scored)
   apt:
-    name: {{ access_control }}
+    name: "{{ access_control }}"
     state: present
   ignore_errors: True
   when: access_control != "disabled" and level == 2
 
 - name: 1.6.1.1 Ensure SELinux is not disabled in bootloader configuration (Scored)
-  command: sed -i -r 's/selinux=0//g' /etc/default/grub
-  command: sed -i -r 's/enforcing=0//g' /etc/default/grub
-  notify: update grub
-  when: access_control == "apparmor" and level == 2
+  replace:
+    path: /etc/default/grub
+    regexp: 'selinux=0'
+    replace: ''
+  when: access_control == "selinux" and level == 2
+
+- name: 1.6.1.1 Ensure SELinux is not disabled in bootloader configuration (Scored)
+  replace:
+    path: /etc/default/grub
+    regexp: 'enforcing=0'
+    replace: ''
+  when: access_control == "selinux" and level == 2
 
 - name: 1.6.1.2 Ensure the SELinux state is enforcing (Scored)
   lineinfile:
@@ -263,8 +278,10 @@
   when: access_control == "selinux" and level == 2
 
 - name: 1.6.2.1 Ensure AppArmor is not disabled in bootloader configuration (Scored)
-  command: sed -i -r 's/apparmor=0//g' /etc/default/grub
-  notify: update grub
+  replace:
+    path: /etc/default/grub
+    regexp: 'apparmor=0'
+    replace: ''
   when: access_control == "apparmor" and level == 2
 
 - name: 1.6.2.2 Ensure all AppArmor Profiles are enforcing (Scored)
@@ -318,14 +335,15 @@
   lineinfile:
     path: /etc/gdm3/greeter.dconf-defaults
     create: yes
-    regexp: "{{ item.regexp }}"
+    line: "{{ item }}"
+    state: present
   with_items:
-    - { regexp: '^[org/gnome/login-screen]' }
-    - { regexp: '^banner-message-enable=true' }
-    - { regexp: '^banner-message-text=\'Authorized uses only. All activity may be monitored and reported.\'' }
+    - "[org/gnome/login-screen]"
+    - "banner-message-enable=true"
+    - "banner-message-text='Authorized uses only. All activity may be monitored and reported.'"
 
 - name: 1.8 Ensure updates, patches, and additional security software are installed (Not Scored)
   apt:
     update_cache: yes
     cache_valid_time: "3600"
-    upgrade: yes
+    upgrade: dist
