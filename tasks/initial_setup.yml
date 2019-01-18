@@ -179,7 +179,7 @@
     - { name: 'set superusers=' , value: '"root"' , value2: '' }
     - { name: 'password_pbkdf2 ' , value: 'root' , value2: '{{ grub_password }}' }
   notify: update grub
-  when: boot_password.rc == 1
+  when: boot_password.rc == 1 and grub_password != disabled
 
 - name: 1.4.3 Ensure authentication required for single user mode (Scored)
   command: grep "^root:[*\!]:" /etc/shadow
@@ -230,8 +230,7 @@
 - name: 1.5.4 Ensure prelink is disabled (Scored)
   shell: 'prelink -ua'
   ignore_errors: True
-  args:
-    warn: False
+  failed_when: False
 
 - name: 1.5.4 Ensure prelink is disabled (Scored)
   apt:
