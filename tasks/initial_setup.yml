@@ -174,20 +174,31 @@
   failed_when: False
   ignore_errors: True
   changed_when: False
-  when: grub_password != disabled
+  when: grub_password != "disabled"
 
 - name: 1.4.2 Ensure bootloader password is set (Scored)
   lineinfile:
       path: /etc/grub.d/40_custom
       regexp: '^{{ item.name }}'
-      line: '{{ item.name }}{{ item.value }} {{ item.value2 }}'
+      line: '{{ item.name }}{{ item.user }} {{ item.pass }}'
       state: present
       insertafter: EOF
   with_items:
-    - { name: 'set superusers=' , value: '"root"' , value2: '' }
-    - { name: 'password_pbkdf2 ' , value: 'root' , value2: '{{ grub_password }}' }
+    - { name: 'set superusers=' , user: '"root"' , pass: '' }
+    - { name: 'password_pbkdf2 ' , user: 'root' , pass: '{{ grub_password }}' }
   notify: update grub
-  when: grub_password != disabled and boot_password.rc == 1
+  when: grub_password != "disabled" and boot_password.rc == 1
+
+- name: 1.4.2 Ensure bootloader password is set (Scored)
+  replace:
+      path: /etc/grub.d/10_linux
+      regexp: '^{{ item.old }}'
+      replace: '{{ item.new }}'
+  with_items:
+    - { old: 'echo "menuentry ''$(echo "$title" | grub_quote)''' , new: 'echo "menuentry ''$(echo "$title" | grub_quote)'' --unrestricted ' }
+    - { old: 'echo "menuentry ''$(echo "$os" | grub_quote)''' , new: 'echo "menuentry ''$(echo "$os" | grub_quote)'' --unrestricted ' }
+  notify: update grub
+  when: grub_password != "disabled" and boot_password.rc == 1
 
 - name: 1.4.3 Ensure authentication required for single user mode (Scored)
   command: grep "^root:[*\!]:" /etc/shadow

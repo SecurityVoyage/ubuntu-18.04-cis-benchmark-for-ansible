@@ -1,4 +1,5 @@
 ---
+
 # defaults file for ubuntu-18.04-cis-benchmark-for-ansible
 
 # Profile Applicability - Set to 'server' or 'workstation' (default = server); see CIS documentation for more information.
