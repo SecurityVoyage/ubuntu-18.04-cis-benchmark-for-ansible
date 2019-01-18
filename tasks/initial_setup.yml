@@ -186,7 +186,6 @@
   with_items:
     - { name: 'set superusers=' , user: '"root"' , pass: '' }
     - { name: 'password_pbkdf2 ' , user: 'root' , pass: '{{ grub_password }}' }
-  notify: update grub
   when: grub_password != "disabled" and boot_password.rc == 1
 
 - name: 1.4.2 Ensure bootloader password is set (Scored)
