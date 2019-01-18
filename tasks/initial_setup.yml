@@ -169,6 +169,14 @@
     mode: 0600
 
 - name: 1.4.2 Ensure bootloader password is set (Scored)
+  command: grep "^password" /boot/grub/grub.cfg
+  register: boot_password
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+  when: grub_password != disabled
+
+- name: 1.4.2 Ensure bootloader password is set (Scored)
   lineinfile:
       path: /etc/grub.d/40_custom
       regexp: '^{{ item.name }}'
@@ -179,7 +187,7 @@
     - { name: 'set superusers=' , value: '"root"' , value2: '' }
     - { name: 'password_pbkdf2 ' , value: 'root' , value2: '{{ grub_password }}' }
   notify: update grub
-  when: boot_password.rc == 1 and grub_password != disabled
+  when: grub_password != disabled and boot_password.rc == 1
 
 - name: 1.4.3 Ensure authentication required for single user mode (Scored)
   command: grep "^root:[*\!]:" /etc/shadow
@@ -193,7 +201,7 @@
     name: root
     state: present
     password: "{{ root_password }}"
-  when: root_password_set.rc == 0 and root_password != "disabled"
+  when: root_password != "disabled" and root_password_set.rc == 0
 
 - name: 1.5.1 Ensure core dumps are restricted (Scored)
   command: grep "hard core" /etc/security/limits.conf
