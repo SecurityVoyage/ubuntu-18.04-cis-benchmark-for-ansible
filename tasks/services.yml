@@ -156,7 +156,7 @@
 
 - name: 2.3.2 Ensure rsh client is not installed (Scored)
   apt:
-    name: name: ['rsh-client', 'rsh-redone-client']
+    name: ['rsh-client', 'rsh-redone-client']
     state: absent
 
 - name: 2.3.3 Ensure talk client is not installed (Scored)

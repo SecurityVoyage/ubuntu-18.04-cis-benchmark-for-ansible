@@ -41,7 +41,7 @@ iptables: disabled
 # Benchmark Sections
 initial_setup: true
 services: true
-network_configuration: false
+network_configuration: true
 logging_and_auditing: false
 access_authentication_and_authorizatoin: false
 system_maintenance: false
