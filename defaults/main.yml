@@ -31,7 +31,7 @@ time_sync_package: chrony
 
 # Benchmark Sections
 initial_setup: true
-services: false
+services: true
 network_configuration: false
 logging_and_auditing: false
 access_authentication_and_authorizatoin: false

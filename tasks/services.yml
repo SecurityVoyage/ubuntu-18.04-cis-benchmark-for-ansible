@@ -47,51 +47,36 @@
 - name: 2.2.3 Ensure Avahi Server is not enabled (Scored)
   systemd:
     name: avahi-daemon
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.4 Ensure CUPS is not enabled (Scored)
   systemd:
     name: cups
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
-  when profile == "server" or level == "2"
+  when: profile == "server" or level == "2"
 
 - name: 2.2.5 Ensure DHCP Server is not enabled (Scored)
   systemd:
     name: "{{ item }}"
-    state: stoped
+    state: stopped
     enabled: no
   with_items:
     - isc-dhcp-server
     - isc-dhcp-server6
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.6 Ensure LDAP server is not enabled (Scored)
   systemd:
     name: sldap
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.7 Ensure NFS and RPC are not enabled (Scored)
   systemd:
     name: "{{ item }}"
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
   with_items:
     - rpcbind
     - nfs-server
@@ -99,65 +84,44 @@
 - name: 2.2.8 Ensure DNS Server is not enabled (Scored)
   systemd:
     name: bind9
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.9 Ensure FTP Server is not enabled (Scored)
   systemd:
     name: vsftpd
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.10 Ensure HTTP server is not enabled (Scored)
   systemd:
     name: apache2
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False 
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.11 Ensure IMAP and POP3 server is not enabled (Scored)
   systemd:
     name: dovecot
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.12 Ensure Samba is not enabled (Scored)
   systemd:
     name: smbd
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.13 Ensure HTTP Proxy Server is not enabled (Scored)
   systemd:
     name: squid
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.14 Ensure SNMP Server is not enabled (Scored)
   systemd:
     name: snmpd
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
   apt:
@@ -176,20 +140,14 @@
 - name: 2.2.16 Ensure rsync service is not enabled (Scored)
   systemd:
     name: rsync
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.2.17 Ensure NIS Server is not enabled (Scored)
   systemd:
     name: nis
-    state: stoped
+    state: stopped
     enabled: no
-  failed_when: False
-  ignore_errors: True
-  changed_when: False
 
 - name: 2.3.1 Ensure NIS Client is not installed (Scored)
   apt:
@@ -198,11 +156,8 @@
 
 - name: 2.3.2 Ensure rsh client is not installed (Scored)
   apt:
-    name: "{{ item }}"
+    name: name: ['rsh-client', 'rsh-redone-client']
     state: absent
-  with_items:
-    - rsh-client
-    - rsh-redone-client
 
 - name: 2.3.3 Ensure talk client is not installed (Scored)
   apt:
