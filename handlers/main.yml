@@ -5,3 +5,24 @@
   command: update-grub
   changed_when: False
   ignore_errors: True
+
+- name: restart ntp
+  service:
+    name: ntp
+    state: restarted
+  changed_when: False
+  ignore_errors: True
+
+- name: restart chrony
+  service:
+    name: chrony 
+    state: restarted
+  changed_when: False
+  ignore_errors: True
+
+- name: restart postfix
+  service:
+    name: postfix
+    state: restarted
+  changed_when: False
+  ignore_errors: True

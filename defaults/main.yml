@@ -26,6 +26,9 @@ access_control: apparmor
 # SELinux Mode - Set to 'enforing' or 'passive' (default = enforcing).
 selinux_mode: enforcing
 
+# Time Synchronization Package - Set to 'chrony' or 'ntp' (default = chrony).
+time_sync_package: chrony
+
 # Benchmark Sections
 initial_setup: true
 services: false

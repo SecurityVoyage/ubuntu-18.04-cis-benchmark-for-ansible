@@ -1,0 +1,220 @@
+---
+
+- name: 2.1.10 Ensure xinetd is not enabled (Scored)
+  apt:
+    name: xinetd
+    state: absent
+
+- name: 2.1.11 Ensure openbsd-inetd is not installed (Scored)
+  apt:
+    name: openbsd-inetd
+    state: absent
+
+- name: 2.2.1.1 Ensure time synchronization is in use (Not Scored)
+  apt:
+    name: "{{ time_sync_package }}"
+    state: present
+
+- name: 2.2.1.2 Ensure ntp is configured (Scored)
+  lineinfile:
+    path: "{{ item.name }}"
+    regexp: '{{ item.expression }}'
+    line: '{{ item.value }}'
+  with_items:
+    - { name: '/etc/ntp.conf' , expression: '^restrict -4' , value: 'restrict -4 default kod nomodify notrap nopeer noquery' }
+    - { name: '/etc/ntp.conf' , expression: '^restrict -6' , value: 'restrict -6 default kod nomodify notrap nopeer noquery' }
+    - { name: '/etc/init.d/ntp', expression: '^RUNASUSER' , value: 'RUNASUSER=ntp' }
+  when: time_sync_package  == "ntp"
+  notify: restart ntp
+
+- name: 2.2.1.2 Ensure ntp is configured (Scored)
+  debug:
+    msg: "This must be completed manually if you are using a local time server/pool."
+  when: time_sync_package  == "ntp"
+
+- name: 2.2.1.3 Ensure chrony is configured (Scored)
+  debug:
+    msg: "This must be completed manually if you are using a local time server/pool."
+  when: time_sync_package  == "chrony"
+
+- name: 2.2.2 Ensure X Window System is not installed (Scored)
+  apt:
+    name: xserver-xorg-core*
+    purge: yes
+    state: absent
+  when: profile == "server"
+
+- name: 2.2.3 Ensure Avahi Server is not enabled (Scored)
+  systemd:
+    name: avahi-daemon
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.4 Ensure CUPS is not enabled (Scored)
+  systemd:
+    name: cups
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+  when profile == "server" or level == "2"
+
+- name: 2.2.5 Ensure DHCP Server is not enabled (Scored)
+  systemd:
+    name: "{{ item }}"
+    state: stoped
+    enabled: no
+  with_items:
+    - isc-dhcp-server
+    - isc-dhcp-server6
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.6 Ensure LDAP server is not enabled (Scored)
+  systemd:
+    name: sldap
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.7 Ensure NFS and RPC are not enabled (Scored)
+  systemd:
+    name: "{{ item }}"
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+  with_items:
+    - rpcbind
+    - nfs-server
+
+- name: 2.2.8 Ensure DNS Server is not enabled (Scored)
+  systemd:
+    name: bind9
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.9 Ensure FTP Server is not enabled (Scored)
+  systemd:
+    name: vsftpd
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.10 Ensure HTTP server is not enabled (Scored)
+  systemd:
+    name: apache2
+    state: stoped
+    enabled: no
+  failed_when: False 
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.11 Ensure IMAP and POP3 server is not enabled (Scored)
+  systemd:
+    name: dovecot
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.12 Ensure Samba is not enabled (Scored)
+  systemd:
+    name: smbd
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.13 Ensure HTTP Proxy Server is not enabled (Scored)
+  systemd:
+    name: squid
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.14 Ensure SNMP Server is not enabled (Scored)
+  systemd:
+    name: snmpd
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  apt:
+    name: postfix
+    state: present
+
+- name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
+  lineinfile:
+    path: /etc/postfix/main.cf
+    regexp: '^inet_interfaces'
+    line: 'inet_interfaces = loopback-only'
+    state: present
+    create: no
+  notify: restart postfix
+
+- name: 2.2.16 Ensure rsync service is not enabled (Scored)
+  systemd:
+    name: rsync
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.2.17 Ensure NIS Server is not enabled (Scored)
+  systemd:
+    name: nis
+    state: stoped
+    enabled: no
+  failed_when: False
+  ignore_errors: True
+  changed_when: False
+
+- name: 2.3.1 Ensure NIS Client is not installed (Scored)
+  apt:
+    name: nis
+    state: absent
+
+- name: 2.3.2 Ensure rsh client is not installed (Scored)
+  apt:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - rsh-client
+    - rsh-redone-client
+
+- name: 2.3.3 Ensure talk client is not installed (Scored)
+  apt:
+    name: talk
+    state: absent
+
+- name: 2.3.4 Ensure telnet client is not installed (Scored)
+  apt:
+    name: telnet
+    state: absent
+
+- name: 2.3.5 Ensure LDAP client is not installed (Scored)
+  apt:
+    name: ldap-utils
+    state: absent
