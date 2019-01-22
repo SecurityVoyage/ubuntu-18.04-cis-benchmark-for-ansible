@@ -8,8 +8,8 @@ profile: server
 # Security Level - Set to '1' or '2' (default = 2); see CIS documentation for more information.
 level: 2
 
-# Enable AIDE Filesystem Integrity Checking - Set to 'true' or 'false' (default = true)
-enable_aide: true
+# Enable AIDE Filesystem Integrity Checking - Set to 'enabled' or 'disabled' (default = enabled)
+aide: enabled
 
 # Set GRUB Superuser - Specify the superuser for GRUB (default = ubuntu)
 grub_superuser: ubuntu
@@ -28,6 +28,15 @@ selinux_mode: enforcing
 
 # Time Synchronization Package - Set to 'chrony' or 'ntp' (default = chrony).
 time_sync_package: chrony
+
+# IPv4 IP Forwarding - Set to '1' if Docker is installed per https://docs.docker.com/engine/userguide/networking/default_network/container-communication (default = 0).
+net_ipv4_ip_forward: 0
+
+# IPv6 - Set to 'enabled' or 'disabled' depending on wheter you use IPv6 (default = disabled).
+ipv6: disabled
+
+# IPtables - Set to 'enabled' or 'disabled' depending on wheter you are using another host based firewall such as AWS Security Groups (default = disabled).
+iptables: disabled
 
 # Benchmark Sections
 initial_setup: true

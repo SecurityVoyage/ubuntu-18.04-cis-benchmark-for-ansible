@@ -1,0 +1,204 @@
+---
+
+- name: 3.1.1 Ensure IP forwarding is disabled (Scored)
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: '{{ net_ipv4_ip_forward }}'
+    state: present
+
+- name: 3.1.2 Ensure packet redirect sending is disabled (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.send_redirects
+    value: 0
+    state: present
+
+- name: 3.1.2 Ensure packet redirect sending is disabled (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.send_redirects
+    value: 0
+    state: present
+
+- name: 3.2.1 Ensure source routed packets are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.accept_source_route
+    value: 0
+    state: present
+
+- name: 3.2.1 Ensure source routed packets are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.accept_source_route
+    value: 0
+    state: present
+
+- name: 3.2.2 Ensure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.accept_redirects
+    value: 0
+    state: present
+
+- name: 3.2.2 Ensure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.accept_redirects
+    value: 0
+    state: present
+
+- name: 3.2.3 Ensure secure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.secure_redirects
+    value: 0
+    state: present
+
+- name: 3.2.3 Ensure secure ICMP redirects are not accepted (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.secure_redirects
+    value: 0
+    state: present    
+
+- name: 3.2.4 Ensure suspicious packets are logged (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.log_martians
+    value: 1
+    state: present
+
+- name: 3.2.4 Ensure suspicious packets are logged (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.log_martians
+    value: 1
+    state: present
+
+- name: 3.2.5 Ensure broadcast ICMP requests are ignored (Scored)
+  sysctl:
+    name: net.ipv4.icmp_echo_ignore_broadcasts
+    value: 1
+    state: present
+
+- name: 3.2.6 Ensure bogus ICMP responses are ignored (Scored)
+  sysctl:
+    name: net.ipv4.icmp_ignore_bogus_error_responses
+    value: 1
+    state: present
+
+- name: 3.2.7 Ensure Reverse Path Filtering is enabled (Scored)
+  sysctl:
+    name: net.ipv4.conf.all.rp_filter
+    value: 1
+    state: present
+
+- name: 3.2.7 Ensure Reverse Path Filtering is enabled (Scored)
+  sysctl:
+    name: net.ipv4.conf.default.rp_filter
+    value: 1
+    state: present
+
+- name: 3.2.8 Ensure TCP SYN Cookies is enabled (Scored)
+  sysctl:
+    name: net.ipv4.tcp_syncookies
+    value: 1
+    state: present
+
+- name: 3.3.1 Ensure IPv6 router advertisements are not accepted (Not Scored)
+  sysctl:
+    name: net.ipv6.conf.all.accept_ra
+    value: 0
+    state: present
+
+- name: 3.3.1 Ensure IPv6 router advertisements are not accepted (Not Scored)
+  sysctl:
+    name: net.ipv6.conf.default.accept_ra
+    value: 0
+    state: present
+
+- name: 3.3.2 Ensure IPv6 redirects are not accepted (Not Scored)
+  sysctl:
+    name: net.ipv6.conf.all.accept_redirects
+    value: 0
+    state: present
+
+- name: 3.3.2 Ensure IPv6 redirects are not accepted (Not Scored)
+  sysctl:
+    name: net.ipv6.conf.default.accept_redirects
+    value: 0
+    state: present
+
+- name: 3.3.3 Ensure IPv6 is disabled (Not Scored)
+  replace:
+    path: /etc/default/grub
+    regexp: '{{ item.old }}'
+    replace: '{{ item.new }}'
+  with_items:
+    - { old: '^GRUB_CMDLINE_LINUX_DEFAULT=""', new: 'GRUB_CMDLINE_LINUX_DEFAULT="ipv6.disable=1"' }
+    - { old: '^GRUB_CMDLINE_LINUX=""', new: 'GRUB_CMDLINE_LINUX="ipv6.disable=1"' }
+  notify: update grub
+  when: ipv6 == "disabled"
+
+- name: 3.4.1 Ensure TCP Wrappers is installed (Scored)
+  apt:
+    name: tcpd
+    state: present
+
+- name: 3.4.2 Ensure /etc/hosts.allow is configured (Scored)
+  lineinfile:
+    path: /etc/hosts.allow
+    line: 'ALL:ALL'
+
+- name: 3.4.3 Ensure /etc/hosts.deny is configured (Scored)
+  lineinfile:
+    path: /etc/hosts.deny
+    line: 'ALL:ALL'
+
+- name: 3.4.4 Ensure permissions on /etc/hosts.allow are configured (Scored)
+  file:
+    path: /etc/hosts.allow
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 3.4.5 Ensure permissions on /etc/hosts.deny are 644 (Scored)
+  file:
+    path: /etc/hosts.deny
+    owner: root
+    group: root
+    mode: 0644
+
+- name: 3.5.1 Ensure DCCP is disabled (Not Scored)
+  lineinfile:
+    path: /etc/modprobe.d/network-protocol-blacklist.conf
+    line: 'install dccp /bin/true'
+    state: present
+    create: True
+
+- name: 3.5.2 Ensure SCTP is disabled (Not Scored)
+  lineinfile:
+    path: /etc/modprobe.d/network-protocol-blacklist.conf
+    line: 'install sctp /bin/true'
+    state: present
+    create: True
+
+- name: 3.5.3 Ensure RDS is disabled (Not Scored)
+  lineinfile:
+    path: /etc/modprobe.d/network-protocol-blacklist.conf
+    line: 'install rds /bin/true'
+    state: present
+    create: True
+
+- name: 3.5.4 Ensure TIPC is disabled (Not Scored)
+  lineinfile:
+    path: /etc/modprobe.d/network-protocol-blacklist.conf
+    line: 'install tipc /bin/true'
+    state: present
+    create: True
+
+- name: 3.6.1 Ensure iptables is installed (Scored)
+  apt:
+    name: iptables 
+    state: present
+  when: iptables == "enabled"
+
+- name: 3.7 Ensure wireless interfaces are disabled (Not Scored)
+  apt:
+    name: rfkill
+    state: present
+  when: profile == "server" or level == 2
+
+- name: 3.7 Ensure wireless interfaces are disabled (Not Scored)
+  command: rfkill block all
