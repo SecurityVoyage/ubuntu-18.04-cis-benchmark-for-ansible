@@ -49,12 +49,14 @@
     name: avahi-daemon
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.4 Ensure CUPS is not enabled (Scored)
   systemd:
     name: cups
     state: stopped
     enabled: no
+  ignore_errors: True
   when: profile == "server" or level == "2"
 
 - name: 2.2.5 Ensure DHCP Server is not enabled (Scored)
@@ -65,12 +67,14 @@
   with_items:
     - isc-dhcp-server
     - isc-dhcp-server6
+  ignore_errors: True
 
 - name: 2.2.6 Ensure LDAP server is not enabled (Scored)
   systemd:
     name: sldap
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.7 Ensure NFS and RPC are not enabled (Scored)
   systemd:
@@ -80,48 +84,56 @@
   with_items:
     - rpcbind
     - nfs-server
+  ignore_errors: True
 
 - name: 2.2.8 Ensure DNS Server is not enabled (Scored)
   systemd:
     name: bind9
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.9 Ensure FTP Server is not enabled (Scored)
   systemd:
     name: vsftpd
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.10 Ensure HTTP server is not enabled (Scored)
   systemd:
     name: apache2
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.11 Ensure IMAP and POP3 server is not enabled (Scored)
   systemd:
     name: dovecot
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.12 Ensure Samba is not enabled (Scored)
   systemd:
     name: smbd
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.13 Ensure HTTP Proxy Server is not enabled (Scored)
   systemd:
     name: squid
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.14 Ensure SNMP Server is not enabled (Scored)
   systemd:
     name: snmpd
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.15 Ensure mail transfer agent is configured for local-only mode (Scored)
   apt:
@@ -142,12 +154,14 @@
     name: rsync
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.2.17 Ensure NIS Server is not enabled (Scored)
   systemd:
     name: nis
     state: stopped
     enabled: no
+  ignore_errors: True
 
 - name: 2.3.1 Ensure NIS Client is not installed (Scored)
   apt:
