@@ -38,11 +38,29 @@ ipv6: disabled
 # IPtables - Set to 'enabled' or 'disabled' depending on wheter you are using another host based firewall such as AWS Security Groups (default = disabled).
 iptables: disabled
 
+# Maximum File Size of Logs - Set the prefered max file size of logs in MBs before it's rotated (default = 100).
+max_log_file_auditd: 100
+
+# No-Space-Left Action - Set the prefered action when auditd runs our of space (default = halt). See auditd man file for more information.
+no_space_left_action: halt
+
+# Log Retention - Set to 'keep_logs' indefinietly or 'rotate' to rotate logs over time (default = keep_logs).
+max_log_file_action: keep_logs
+
+# Remote Logging - Set to 'enabled', or 'disabled' if you are using a a non-native log collector (default = enabled).
+remote_logging: enabled
+
+# Prefered Syslog Package - Set to 'rsyslog' or 'syslog-ng' if using native logging (default = rsyslog).
+syslog_package: rsyslog
+
+# Remote Logs Host Address - Set IP address of the remote log server. The IP address below is for example only.
+remote_logs_host_address: 192.168.1.1
+
 # Benchmark Sections
 initial_setup: true
 services: true
 network_configuration: true
-logging_and_auditing: false
+logging_and_auditing: true
 access_authentication_and_authorizatoin: false
 system_maintenance: false
 

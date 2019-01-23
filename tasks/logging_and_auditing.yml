@@ -1,0 +1,428 @@
+---
+
+- name: 4.1.1.1 Ensure audit log storage size is configured (Not Scored)
+  apt:
+      name: auditd
+      state: present
+  when: level == 2
+
+- name: 4.1.1.1 Ensure audit log storage size is configured (Not Scored)
+  lineinfile: 
+      path: /etc/audit/auditd.conf
+      line: 'max_log_file = {{ max_log_file_auditd }}'
+      state: present
+      create: yes
+  when: level == 2
+
+- name: 4.1.1.2 Ensure system is disabled when audit logs are full (Scored)
+  lineinfile:
+      path: /etc/audit/auditd.conf
+      line: '{{ item.name }} = {{ item.value }}'
+      state: present
+      create: yes
+  with_items:
+      - { name: 'space_left_action' , value: 'email' } 
+      - { name: 'action_mail_acct' , value: 'root' }
+      - { name: 'admin_space_left_action' , value: '{{ no_space_left_action }}' }
+  when: level == 2
+
+- name: 4.1.1.3 Ensure audit logs are not automatically deleted (Scored)
+  lineinfile:
+      path: /etc/audit/auditd.conf
+      line: 'max_log_file_action = {{ max_log_file_action }}'
+      state: present
+      create: yes
+  when: level == 2
+
+- name: 4.1.2 Ensure auditd service is enabled (Scored)
+  service:
+      name: auditd
+      enabled: yes
+  when: level == 2
+
+- name: 4.1.3 Ensure auditing for processes that start prior to auditd is enabled (Scored)
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit=1)\"[^\"]*)(\".*)'
+    line: '\1audit=1\2'
+    backrefs: yes
+    state: present
+  notify: update grub
+  when: level == 2
+
+- name: 4.1.4 Ensure events that modify date and time information are collected (Scored)
+  lineinfile: 
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change'
+    - '-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change'
+    - '-a always,exit -F arch=b64 -S clock_settime -k time-change'
+    - '-a always,exit -F arch=b32 -S clock_settime -k time-change'
+    - '-w /etc/localtime -p wa -k time-change'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.5 Ensure events that modify user/group information are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes    
+  with_items:
+    - '-w /etc/group -p wa -k identity'
+    - '-w /etc/passwd -p wa -k identity'
+    - '-w /etc/gshadow -p wa -k identity'
+    - '-w /etc/shadow -p wa -k identity'
+    - '-w /etc/security/opasswd -p wa -k identity'
+  notify: restart auditd
+  when: level == 2
+#
+- name: 4.1.6 Ensure events that modify the system's network environment are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale'
+    - '-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale'
+    - '-w /etc/issue -p wa -k system-locale'
+    - '-w /etc/issue.net -p wa -k system-locale'
+    - '-w /etc/hosts -p wa -k system-locale'
+    - '-w /etc/sysconfig/network -p wa -k system-locale'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.7 Ensure events that modify the system's Mandatory Access Controls are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /etc/selinux/ -p wa -k MAC-policy'
+    - '-w /usr/share/selinux/ -p wa -k MAC-policy'
+    - '-w /etc/apparmor/ -p wa -k MAC-policy'
+    - '-w /etc/apparmor.d/ -p wa -k MAC-policy'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.8 Ensure login and logout events are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /var/log/faillog -p wa -k logins'
+    - '-w /var/log/lastlog -p wa -k logins'
+    - '-w /var/log/tallylog -p wa -k logins'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.9 Ensure session initiation information is collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /var/run/utmp -p wa -k session'
+    - '-w /var/log/wtmp -p wa -k session'
+    - '-w /var/log/btmp -p wa -k session'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.10 Ensure discretionary access control permission modification events are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+    - '-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+    - '-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+    - '-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+    - '-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+    - '-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.11 Ensure unsuccessful unauthorized file access attempts are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+    - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access'
+    - '-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+    - '-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.12 Ensure use of privileged commands is collected (Scored)
+  shell: "find / -path /sys -prune -o -path /proc -prune -o -path /run -prune -o \\( -perm -4000 -o -perm -2000 \\) -type f|egrep -v '/sys|/proc|/run'"
+  register: setuid_setgid_commands
+  changed_when: False
+  when: level == 2
+
+- name: 4.1.12 Ensure use of privileged commands is collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '-a always,exit -F path={{ item }} -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged'
+    state: present
+    create: yes
+  with_items: "{{ setuid_setgid_commands.stdout_lines }}"
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.13 Ensure successful file system mounts are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+    - '-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.14 Ensure file deletion events by users are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+    - '-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.15 Ensure changes to system administration scope (sudoers) is collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /etc/sudoers -p wa -k scope'
+    - '-w /etc/sudoers.d -p wa -k scope'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.16 Ensure system administrator actions (sudolog) are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '-w /var/log/sudo.log -p wa -k actions'
+    state: present
+    create: yes
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.17 Ensure kernel module loading and unloading is collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /sbin/insmod -p x -k modules'
+    - '-w /sbin/rmmod -p x -k modules'
+    - '-w /sbin/modprobe -p x -k modules'
+    - '-a always,exit -F arch=b64 -S init_module -S delete_module -k modules'
+  notify: restart auditd
+  when: level == 2
+
+- name: 4.1.18 Ensure the audit configuration is immutable (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '-e 2'
+    state: present
+    create: yes
+    insertafter: EOF
+  when: level == 2
+
+- name: 4.2.3 Ensure rsyslog or syslog-ng is installed (Scored)
+  apt:
+    name: "{{ syslog_package }}"
+    state: present
+
+- name: 4.2.1.1 Ensure rsyslog Service is enabled (Scored)
+  systemd:
+    name: rsyslog
+    state: started
+    enabled: yes
+  when: syslog_package == "rsyslog"
+
+- name: 4.2.1.2 Ensure logging is configured (Not Scored)
+  lineinfile:
+      path: /etc/rsyslog.conf
+      line: '{{ item }}'
+      insertafter: EOF
+  with_items:
+    - '*.emerg :omusrmsg:*'
+    - 'mail.* -/var/log/mail'
+    - 'mail.info -/var/log/mail.info'
+    - 'mail.warning -/var/log/mail.warn'
+    - 'mail.err /var/log/mail.err'
+    - 'news.crit -/var/log/news/news.crit'
+    - 'news.err -/var/log/news/news.err'
+    - 'news.notice -/var/log/news/news.notice'
+    - '*.=warning;*.=err -/var/log/warn'
+    - '*.crit /var/log/warn'
+    - '*.*;mail.none;news.none -/var/log/messages'
+    - 'local0,local1.* -/var/log/localmessages'
+    - 'local2,local3.* -/var/log/localmessages'
+    - 'local4,local5.* -/var/log/localmessages'
+    - 'local6,local7.* -/var/log/localmessages'
+  notify: restart rsyslog
+  when: syslog_package == "rsyslog"
+
+- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
+  command: find /etc/rsyslog.d -type f
+  register: rsyslog_files
+  changed_when: false
+
+- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
+  command: grep ^\\$FileCreateMode {{ item }}
+  with_items:
+    - '/etc/rsyslog.conf'
+    - '{{ rsyslog_files.stdout_lines }}'    
+  register: filecreate_exists
+  ignore_errors: true
+  when: syslog_package == "rsyslog"
+
+- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
+  lineinfile:
+    path: "{{ item }}"
+    regexp: '^\$FileCreateMode'
+    line: '$FileCreateMode 0640'
+  with_items:
+    - '/etc/rsyslog.conf'
+    - '{{ rsyslog_files.stdout_lines }}'
+  notify: restart rsyslog
+  when: filecreate_exists == 0 and syslog_package == "rsyslog"
+
+- name: 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host (Scored)
+  command: grep "^*.*[^I][^I]*@" /etc/rsyslog.conf
+  register: remoteloghost
+  changed_when: False
+  failed_when: False
+  check_mode: no
+
+- name: 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host (Scored)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    line: '*.* @@{{ remote_logs_host_address }}'
+    insertafter: EOF
+    state: present
+  notify: restart rsyslog
+  when: remoteloghost.rc == 1 and syslog_package == "rsyslog"
+
+- name: 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts. (Not Scored)
+  command: grep '^$ModLoad imtcp' /etc/rsyslog.conf
+  register: moadloadpresent
+  failed_when: False
+  check_mode: no
+
+- name: 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts. (Not Scored)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^#({{ item }})'
+    line: '{{ item }}'
+    state: present
+  with_items:
+      - '$ModLoad imtcp'
+      - '$InputTCPServerRun 514'
+  notify: restart rsyslog
+  when: moadloadpresent.rc == 1 and syslog_package == "rsyslog"
+
+- name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
+  command: dpkg-query -s syslog-ng
+  register: syslognginstalled
+  changed_when: False
+  failed_when: False
+  check_mode: no
+
+- name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
+  service:
+    name: syslog-ng
+    enabled: yes
+  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+
+- name: 4.2.2.2 Ensure logging is configured (Not Scored)
+  lineinfile:
+      path: /etc/syslog-ng/syslog-ng.conf
+      line: '{{ item }}'
+      insertafter: EOF
+  with_items:
+    - 'log { source(src); source(chroots); filter(f_console); destination(console); };'
+    - 'log { source(src); source(chroots); filter(f_console); destination(xconsole); };'
+    - 'log { source(src); source(chroots); filter(f_newscrit); destination(newscrit); };'
+    - 'log { source(src); source(chroots); filter(f_newserr); destination(newserr); };'
+    - 'log { source(src); source(chroots); filter(f_newsnotice); destination(newsnotice); };'
+    - 'log { source(src); source(chroots); filter(f_mailinfo); destination(mailinfo); };'
+    - 'log { source(src); source(chroots); filter(f_mailwarn); destination(mailwarn); };'
+    - 'log { source(src); source(chroots); filter(f_mailerr); destination(mailerr); };'
+    - 'log { source(src); source(chroots); filter(f_mail); destination(mail); };'
+    - 'log { source(src); source(chroots); filter(f_acpid); destination(acpid); flags(final); };'
+    - 'log { source(src); source(chroots); filter(f_acpid_full); destination(devnull); flags(final); };'
+    - 'log { source(src); source(chroots); filter(f_acpid_old); destination(acpid); flags(final); };'
+    - 'log { source(src); source(chroots); filter(f_netmgm); destination(netmgm); flags(final); };'
+    - 'log { source(src); source(chroots); filter(f_local); destination(localmessages); };'
+    - 'log { source(src); source(chroots); filter(f_messages); destination(messages); };'
+    - 'log { source(src); source(chroots); filter(f_iptables); destination(firewall); };'
+    - 'log { source(src); source(chroots); filter(f_warn); destination(warn); };'
+  changed_when: False
+  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  notify: restart syslog-ng
+
+- name: 4.2.2.3 Ensure syslog-ng default file permissions configured (Scored)
+  lineinfile:
+    path: /etc/syslog-ng/syslog-ng.conf
+    regexp: '^options'
+    line: 'options { chain_hostnames(off); flush_lines(0); perm(0640); stats_freq(3600); threaded(yes); };'
+  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  notify: restart syslog-ng
+
+- name: 4.2.2.4 Ensure syslog-ng is configured to send logs to a remote log host (Scored)
+  lineinfile:
+    path: /etc/syslog-ng/syslog-ng.conf
+    regexp: '^destination'
+    line: 'destination logserver { tcp(" logfile.example.com " port(514)); }; log { source(src); destination(logserver); };'
+  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  notify: restart syslog-ng
+
+- name: 4.2.2.5 Ensure remote syslog-ng messages are only accepted on designated log hosts (Not Scored)
+  lineinfile:
+    path: /etc/syslog-ng/syslog-ng.conf
+    line: '{{ item }}"'
+    insertafter: EOF
+  with_items:
+    - 'source net{ tcp(); };'
+    - 'destination remote { file("/var/log/remote/${FULLHOST}-log"); };'
+    - 'log { source(net); destination(remote); };'
+  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  notify: restart syslog-ng
+
+- name: 4.2.4 Ensure permissions on all logfiles are configured (Scored)
+  file:
+    path: /var/log
+    mode: g-wx,o-rwx
+    recurse: yes
+
+- name: 4.3 Ensure logrotate is configured (Not Scored)
+  lineinfile:
+    path: /etc/logrotate.conf
+    line: '{{ item }}"'
+    insertafter: EOF
+  with_items:
+    - 'maxage 90'

@@ -121,13 +121,12 @@
     state: present
 
 - name: 3.3.3 Ensure IPv6 is disabled (Not Scored)
-  replace:
+  lineinfile:
     path: /etc/default/grub
-    regexp: '{{ item.old }}'
-    replace: '{{ item.new }}'
-  with_items:
-    - { old: '^GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=ttyS0"', new: 'GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 console=ttyS0 ipv6.disable=1"' }
-    - { old: '^GRUB_CMDLINE_LINUX=""', new: 'GRUB_CMDLINE_LINUX="ipv6.disable=1"' }
+    regexp: '^(GRUB_CMDLINE_LINUX=(?!.*ipv6.disable=1)\"[^\"]*)(\".*)'
+    line: '\1ipv6.disable=1\2'
+    backrefs: yes
+    state: present
   notify: update grub
   when: ipv6 == "disabled"
 
