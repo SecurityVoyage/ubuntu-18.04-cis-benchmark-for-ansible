@@ -56,6 +56,9 @@ syslog_package: rsyslog
 # Remote Logs Host Address - Set IP address of the remote log server. The IP address below is for example only.
 remote_logs_host_address: 192.168.1.1
 
+# Log Host - Set to 'disabled', or 'enabled' depending on if the host will be a log host for ther systems (default = disabled).
+log_host: disabled
+
 # Benchmark Sections
 initial_setup: true
 services: true

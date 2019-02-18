@@ -1,12 +1,12 @@
 ---
 
-- name: 4.1.1.1 Ensure audit log storage size is configured (Not Scored)
+- name: 4.1.1.1 Ensure audit log storage size is configured (Scored)
   apt:
       name: auditd
       state: present
   when: level == 2
 
-- name: 4.1.1.1 Ensure audit log storage size is configured (Not Scored)
+- name: 4.1.1.1 Ensure audit log storage size is configured (Scored)
   lineinfile: 
       path: /etc/audit/auditd.conf
       line: 'max_log_file = {{ max_log_file_auditd }}'
@@ -103,12 +103,22 @@
     state: present
     create: yes
   with_items:
-    - '-w /etc/selinux/ -p wa -k MAC-policy'
-    - '-w /usr/share/selinux/ -p wa -k MAC-policy'
     - '-w /etc/apparmor/ -p wa -k MAC-policy'
     - '-w /etc/apparmor.d/ -p wa -k MAC-policy'
   notify: restart auditd
-  when: level == 2
+  when: level == 2 and access_control == "apparmor"
+
+- name: 4.1.7 Ensure events that modify the system's Mandatory Access Controls are collected (Scored)
+  lineinfile:
+    path: /etc/audit/audit.rules
+    line: '{{ item }}'
+    state: present
+    create: yes
+  with_items:
+    - '-w /etc/selinux/ -p wa -k MAC-policy'
+    - '-w /usr/share/selinux/ -p wa -k MAC-policy'
+  notify: restart auditd
+  when: level == 2 and access_control == "selinux"
 
 - name: 4.1.8 Ensure login and logout events are collected (Scored)
   lineinfile:
@@ -131,8 +141,8 @@
     create: yes
   with_items:
     - '-w /var/run/utmp -p wa -k session'
-    - '-w /var/log/wtmp -p wa -k session'
-    - '-w /var/log/btmp -p wa -k session'
+    - '-w /var/log/wtmp -p wa -k logins'
+    - '-w /var/log/btmp -p wa -k logins'
   notify: restart auditd
   when: level == 2
 
@@ -167,19 +177,8 @@
   when: level == 2
 
 - name: 4.1.12 Ensure use of privileged commands is collected (Scored)
-  shell: "find / -path /sys -prune -o -path /proc -prune -o -path /run -prune -o \\( -perm -4000 -o -perm -2000 \\) -type f|egrep -v '/sys|/proc|/run'"
-  register: setuid_setgid_commands
-  changed_when: False
-  when: level == 2
-
-- name: 4.1.12 Ensure use of privileged commands is collected (Scored)
-  lineinfile:
-    path: /etc/audit/audit.rules
-    line: '-a always,exit -F path={{ item }} -F perm=x -F auid>=1000 -F auid!=4294967295 -k privileged'
-    state: present
-    create: yes
-  with_items: "{{ setuid_setgid_commands.stdout_lines }}"
-  notify: restart auditd
+  debug:
+    msg: "This must be completed manually."
   when: level == 2
 
 - name: 4.1.13 Ensure successful file system mounts are collected (Scored)
@@ -338,12 +337,24 @@
     path: /etc/rsyslog.conf
     regexp: '^#({{ item }})'
     line: '{{ item }}'
+    state: absent
+  with_items:
+      - '$ModLoad imtcp'
+      - '$InputTCPServerRun 514'
+  notify: restart rsyslog
+  when: moadloadpresent.rc == 1 and syslog_package == "rsyslog" and log_host == "disabled"
+
+- name: 4.2.1.5 Ensure remote rsyslog messages are only accepted on designated log hosts. (Not Scored)
+  lineinfile:
+    path: /etc/rsyslog.conf
+    regexp: '^#({{ item }})'
+    line: '{{ item }}'
     state: present
   with_items:
       - '$ModLoad imtcp'
       - '$InputTCPServerRun 514'
   notify: restart rsyslog
-  when: moadloadpresent.rc == 1 and syslog_package == "rsyslog"
+  when: moadloadpresent.rc == 1 and syslog_package == "rsyslog" and log_host == "enabled"
 
 - name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
   command: dpkg-query -s syslog-ng
@@ -351,6 +362,7 @@
   changed_when: False
   failed_when: False
   check_mode: no
+  when: syslog_package == "syslog-ng"
 
 - name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
   service:
