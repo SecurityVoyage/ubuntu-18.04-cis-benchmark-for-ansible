@@ -44,7 +44,7 @@
   lineinfile:
     path: /etc/default/grub
     regexp: '^(GRUB_CMDLINE_LINUX=(?!.*audit=1)\"[^\"]*)(\".*)'
-    line: '\1audit=1\2'
+    line: '\1audit=1 \2'
     backrefs: yes
     state: present
   notify: update grub
