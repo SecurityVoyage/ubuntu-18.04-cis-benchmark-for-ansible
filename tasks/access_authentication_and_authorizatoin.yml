@@ -1,0 +1,325 @@
+---
+
+- name: 5.1.1 Ensure cron daemon is enabled (Scored)
+  service:
+    name: cron
+    state: started
+    enabled: yes
+
+- name: 5.1.2 Ensure permissions on /etc/crontab are configured (Scored)
+  file:
+    path: /etc/crontab
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.3 Ensure permissions on /etc/cron.hourly are configured (Scored)
+  file:
+    path: /etc/cron.hourly
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.4 Ensure permissions on /etc/cron.daily are configured (Scored)
+  file:
+    path: /etc/cron.daily
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.5 Ensure permissions on /etc/cron.weekly are configured (Scored)
+  file:
+    path: /etc/cron.weekly
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.6 Ensure permissions on /etc/cron.monthly are configured (Scored)
+  file:
+    path: /etc/cron.monthly
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.7 Ensure permissions on /etc/cron.d are configured (Scored)
+  file:
+    path: /etc/cron.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0600
+
+- name: 5.1.8 Ensure at/cron is restricted to authorized users (Scored)
+  file:
+    path: "{{ item.name }}"
+    owner: root
+    group: root
+    mode: 0600
+    state: "{{ item.state }}"
+  with_items:
+    - { name: '/etc/cron.deny' , state: 'absent' }
+    - { name: '/etc/at.deny' , state: 'absent' }
+    - { name: '/etc/cron.allow' , state: 'touch' }
+    - { name: '/etc/at.allow' , state: 'touch' }
+
+- name: 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured (Scored)
+  file:
+    path: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0600
+    state: file
+  notify: restart ssh
+
+- name: 5.2.2 Ensure SSH Protocol is set to 2 (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Protocol'
+    line: 'Protocol 2'
+  notify: restart ssh
+
+- name: 5.2.3 Ensure SSH LogLevel is set to INFO (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^LogLevel'
+    line: 'LogLevel INFO'
+  notify: restart ssh
+
+- name: 5.2.4 Ensure SSH X11 forwarding is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^X11Forwarding'
+    line: 'X11Forwarding no'
+  notify: restart ssh
+
+- name: 5.2.5 Ensure SSH MaxAuthTries is set to 4 or less (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^MaxAuthTries'
+    line: 'MaxAuthTries 4'
+  notify: restart ssh
+
+- name: 5.2.6 Ensure SSH IgnoreRhosts is enabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^IgnoreRhosts'
+    line: 'IgnoreRhosts yes'
+  notify: restart ssh
+
+- name: 5.2.7 Ensure SSH HostbasedAuthentication is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^HostbasedAuthentication'
+    line: 'HostbasedAuthentication no'
+  notify: restart ssh
+
+- name: 5.2.8 Ensure SSH root login is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitRootLogin'
+    line: 'PermitRootLogin no'
+  notify: restart ssh
+
+- name: 5.2.9 Ensure SSH PermitEmptyPasswords is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitEmptyPasswords'
+    line: 'PermitEmptyPasswords no'
+  notify: restart ssh
+
+- name: 5.2.10 Ensure SSH PermitUserEnvironment is disabled (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PermitUserEnvironment'
+    line: 'PermitUserEnvironment no'
+  notify: restart ssh
+
+- name: 5.2.11 Ensure only approved MAC algorithms are used (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    line: 'MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com,hmac-sha2-512,hmac-sha2-256,umac-128@openssh.com'
+  notify: restart ssh
+
+- name: 5.2.12 Ensure SSH Idle Timeout Interval is configured (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^{{item.name}}'
+    line: '{{item.name}} {{item.value}}'
+  with_items:
+    - { name: 'ClientAliveInterval' , value: '300' }
+    - { name: 'ClientAliveCountMax' , value: '0' }
+  notify: restart ssh
+
+- name: 5.2.13 Ensure SSH LoginGraceTime is set to one minute or less (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^LoginGraceTime'
+    line: 'LoginGraceTime 60'
+  notify: restart ssh
+
+- name: 5.2.14 Ensure SSH access is limited (Scored)
+  debug:
+    msg: "This must be completed manually."
+
+- name: 5.2.15 Ensure SSH warning banner is configured (Scored)
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^Banner'
+    line: 'Banner /etc/issue.net'
+  notify: restart ssh
+
+- name: 5.3.1 Ensure password creation requirements are configured (Scored)
+  apt:
+    name: libpam-pwquality
+    state: present
+
+- name: 5.3.1 Ensure password creation requirements are configured (Scored)
+  lineinfile:
+    name: /etc/security/pwquality.conf
+    regexp: '^{{item.name}}'
+    line: '{{item.name}}={{item.value}}'
+  with_items:
+    - { name: 'minlen' , value: '14' }
+    - { name: 'dcredit' , value: '-1' }
+    - { name: 'ucredit' , value: '-1' }
+    - { name: 'ocredit' , value: '-1' }
+    - { name: 'lcredit' , value: '-1' }
+
+- name: 5.3.1 Ensure password creation requirements are configured (Scored)
+  lineinfile:
+    name: /etc/pam.d/common-password
+    regexp: 'pam_pwquality.so'
+    line: 'password requisite pam_pwquality.so retry=3'
+
+- name: 5.3.2 Ensure lockout for failed password attempts is configured (Not Scored)
+  lineinfile:
+    name: /etc/pam.d/common-auth
+    regexp: 'pam_tally2'
+    line: 'auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900'
+
+- name: 5.3.3 Ensure password reuse is limited (Scored)
+  lineinfile:
+    name: /etc/pam.d/common-password
+    regexp: '^password\s+sufficient\s+pam_unix.so'
+    line: 'password required pam_pwhistory.so remember={{ remember_passwords }}'
+
+- name: 5.3.4 Ensure password hashing algorithm is SHA-512 (Scored)
+  lineinfile:
+    name: /etc/pam.d/common-password
+    regexp: '^password\s+\S+\s+pam_unix.so'
+    line: 'password [success=1 default=ignore] pam_unix.so sha512'
+
+- name: 5.4.1.1 Ensure password expiration is 90 days or less (Scored)
+  command: grep -oP '(?<=^PASS_MAX_DAYS\s)[0-9]+' /etc/login.defs
+  register: pass_max_days
+  changed_when: False
+  check_mode: no
+
+- name: 5.4.1.1 Ensure password expiration is 90 days or less (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    line: 'PASS_MAX_DAYS {{ max_password_age }}'
+    regexp: '^PASS_MAX_DAYS'
+  when: pass_max_days.stdout|int > max_password_age
+
+- name: 5.4.1.2 Ensure minimum days between password changes is 7 or more (Scored)
+  command: grep -oP '(?<=^PASS_MIN_DAYS\s)[0-9]+' /etc/login.defs
+  register: pass_min_days
+  changed_when: False
+  check_mode: no
+
+- name: 5.4.1.2 Ensure minimum days between password changes is 7 or more (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    line: 'PASS_MIN_DAYS {{ min_password_age }}'
+    regexp: '^PASS_MIN_DAYS'
+  when: pass_min_days.stdout|int < {{ min_password_age }}
+
+- name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
+  command: grep -oP '(?<=^PASS_WARN_AGE\s)[0-9]+' /etc/login.defs
+  register: pass_warn_age
+  changed_when: False
+  check_mode: no
+
+- name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    line: 'PASS_WARN_AGE 7'
+    regexp: '^PASS_WARN_AGE'
+  when: pass_warn_age.stdout|int < 7
+
+- name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
+  command: grep INACTIVE /etc/login.defs
+  changed_when: False
+  failed_when: False
+  check_mode: no
+  register: lock_inactive_rc
+
+- name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
+  lineinfile:
+    path: /etc/login.defs
+    line: 'INACTIVE=30'
+    state: present
+  when: lock_inactive_rc.rc == 1
+
+- name: 5.4.1.5 Ensure all users last password change date is in the past (Scored)
+  debug:
+    msg: "This must be completed manually."
+
+- name: 5.4.2 Ensure system accounts are non-login (Scored)
+  shell: egrep -v "^\+" /etc/passwd | awk -F':' '($1!="root" && $1!="sync" && $1!="shutdown" && $1!="halt" && $3<1000 && $7!="/usr/sbin/nologin" && $7!="/bin/false") {print}'
+  register: system_acounts
+  changed_when: False
+
+- name: 5.4.2 Ensure system accounts are non-login (Scored)
+  shell: |
+    for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do
+      if [ $user != "root" ]; then
+        usermod -L $user
+        if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ]; then
+          usermod -s /usr/sbin/nologin $user
+        fi
+      fi
+    done
+  args:
+    executable: /bin/bash
+  when: system_acounts.stdout != ""
+  
+- name: 5.4.3 Ensure default group for the root account is GID 0 (Scored)
+  command: grep "^root:" /etc/passwd | cut -f4 -d':'
+  register: root_gid
+  failed_when: False 
+
+- name: 5.4.3 Ensure default group for the root account is GID 0 (Scored)
+  command: usermod -g 0 root
+  when: root_gid !=0
+
+- name: 5.4.4 Ensure default user umask is 027 or more restrictive (Scored)
+  lineinfile:
+    path: "{{ item }}"
+    line: 'umask 027'
+    regexp: '^umask'
+    state: present
+  with_items:
+    - '/etc/bash.bashrc'
+    - '/etc/profile'
+
+- name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored)
+  lineinfile:
+    path: "{{ item }}"
+    line: 'TMOUT=600'
+    regexp: '^TMOUT'
+    state: present
+  with_items:
+    - '/etc/bash.bashrc'
+    - '/etc/profile'
+  ignore_errors: True
+  when: level == 2
+
+- name: 5.5 Ensure root login is restricted to system console (Not Scored)
+  debug:
+    msg: "This must be completed manually."
+
+- name: 5.6 Ensure access to the su command is restricted (Scored)
+  debug:
+    msg: "This must be completed manually."

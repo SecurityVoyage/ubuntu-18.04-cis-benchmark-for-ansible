@@ -59,6 +59,15 @@ remote_logs_host_address: 192.168.1.1
 # Log Host - Set to 'disabled', or 'enabled' depending on if the host will be a log host for ther systems (default = disabled).
 log_host: disabled
 
+# Pasword Re-use - Set to the maximum number of passwords to remember to deny reuse (default = 5).
+remember_passwords: 5
+
+# Max Password Age - Set to the maximum password age in days (default = 365).
+max_password_age: 365
+
+# Min Password Age - Set to the minimum password age in days (default = 7).
+min_password_age: 7
+
 # Benchmark Sections
 initial_setup: true
 services: true

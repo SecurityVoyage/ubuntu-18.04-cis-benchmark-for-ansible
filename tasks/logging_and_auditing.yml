@@ -179,7 +179,6 @@
 - name: 4.1.12 Ensure use of privileged commands is collected (Scored)
   debug:
     msg: "This must be completed manually."
-  when: level == 2
 
 - name: 4.1.13 Ensure successful file system mounts are collected (Scored)
   lineinfile:
