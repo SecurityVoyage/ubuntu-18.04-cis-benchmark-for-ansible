@@ -138,12 +138,12 @@
 - name: 3.4.2 Ensure /etc/hosts.allow is configured (Scored)
   lineinfile:
     path: /etc/hosts.allow
-    line: 'ALL:ALL'
+    line: 'ALL: ALL'
 
 - name: 3.4.3 Ensure /etc/hosts.deny is configured (Scored)
   lineinfile:
     path: /etc/hosts.deny
-    line: 'ALL:ALL'
+    line: 'ALL: ALL'
 
 - name: 3.4.4 Ensure permissions on /etc/hosts.allow are configured (Scored)
   file:
