@@ -249,18 +249,7 @@
   when: pass_warn_age.stdout|int < 7
 
 - name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
-  command: grep INACTIVE /etc/login.defs
-  changed_when: False
-  failed_when: False
-  check_mode: no
-  register: lock_inactive_rc
-
-- name: 5.4.1.4 Ensure inactive password lock is 30 days or less (Scored)
-  lineinfile:
-    path: /etc/login.defs
-    line: 'INACTIVE=30'
-    state: present
-  when: lock_inactive_rc.rc == 1
+  command: useradd -D -f 30
 
 - name: 5.4.1.5 Ensure all users last password change date is in the past (Scored)
   debug:
@@ -307,7 +296,7 @@
 - name: 5.4.5 Ensure default user shell timeout is 900 seconds or less (Scored)
   lineinfile:
     path: "{{ item }}"
-    line: 'TMOUT=600'
+    line: 'TMOUT=900'
     regexp: '^TMOUT'
     state: present
   with_items:

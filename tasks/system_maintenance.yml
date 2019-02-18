@@ -22,7 +22,7 @@
     path: /etc/shadow
     mode: 0640
     owner: root
-    group: root
+    group: shadow
 
 - name: 6.1.4 Ensure permissions on /etc/group are configured (Scored)
   file:
@@ -36,7 +36,7 @@
     path: /etc/gshadow
     mode: 0640
     owner: root
-    group: root
+    group: shadow
 
 - name: 6.1.6 Ensure permissions on /etc/passwd- are configured (Scored)
   file:
@@ -48,9 +48,9 @@
 - name: 6.1.7 Ensure permissions on /etc/shadow- are configured (Scored)
   file:
     path: /etc/shadow-
-    mode: 0600
+    mode: 0640
     owner: root
-    group: root
+    group: shadow
 
 - name: 6.1.8 Ensure permissions on /etc/group- are configured (Scored)
   file:
@@ -62,9 +62,9 @@
 - name: 6.1.9 Ensure permissions on /etc/gshadow- are configured (Scored)
   file:
     path: /etc/gshadow-
-    mode: 0600
+    mode: 0640
     owner: root
-    group: root
+    group: shadow
 
 - name: 6.1.10 Ensure no world writable files exist (Scored)
   shell: df --local -P | awk {'if (NR!=1) print $6'} | xargs -I '{}' find '{}' -xdev -type f -perm -0002 -print

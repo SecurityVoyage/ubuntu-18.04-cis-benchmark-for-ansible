@@ -1,1 +1,14 @@
 ---
+
+- name: Disable TCP timestamp responses on Linux
+  sysctl:
+    name: net.ipv4.tcp_timestamps
+    value: 0
+    state: present
+
+- name: Ensure permissions on /etc/shadow are 400
+  file:
+    path: /etc/shadow-
+    mode: 0400
+    owner: root
+    group: root
