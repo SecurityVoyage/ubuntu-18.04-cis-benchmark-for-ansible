@@ -73,8 +73,8 @@ initial_setup: true
 services: true
 network_configuration: true
 logging_and_auditing: true
-access_authentication_and_authorizatoin: false
-system_maintenance: false
+access_authentication_and_authorizatoin: true
+system_maintenance: true
 
 # This is an optional set of task that furture secure the OS' configuraiton beyond CIS' benchmarks (default = false).
-extras: false
+extras: true

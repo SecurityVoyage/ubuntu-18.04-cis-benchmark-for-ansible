@@ -233,7 +233,7 @@
     path: /etc/login.defs
     line: 'PASS_MIN_DAYS {{ min_password_age }}'
     regexp: '^PASS_MIN_DAYS'
-  when: pass_min_days.stdout|int < {{ min_password_age }}
+  when: pass_min_days.stdout|int < min_password_age
 
 - name: 5.4.1.3 Ensure password expiration warning days is 7 or more (Scored)
   command: grep -oP '(?<=^PASS_WARN_AGE\s)[0-9]+' /etc/login.defs

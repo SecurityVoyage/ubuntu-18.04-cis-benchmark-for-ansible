@@ -79,7 +79,7 @@
     - '-w /etc/security/opasswd -p wa -k identity'
   notify: restart auditd
   when: level == 2
-#
+
 - name: 4.1.6 Ensure events that modify the system's network environment are collected (Scored)
   lineinfile:
     path: /etc/audit/audit.rules
@@ -285,29 +285,12 @@
   when: syslog_package == "rsyslog"
 
 - name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
-  command: find /etc/rsyslog.d -type f
-  register: rsyslog_files
-  changed_when: false
-
-- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
-  command: grep ^\\$FileCreateMode {{ item }}
-  with_items:
-    - '/etc/rsyslog.conf'
-    - '{{ rsyslog_files.stdout_lines }}'    
-  register: filecreate_exists
-  ignore_errors: true
-  when: syslog_package == "rsyslog"
-
-- name: 4.2.1.3 Ensure rsyslog default file permissions configured (Scored)
   lineinfile:
-    path: "{{ item }}"
+    path: /etc/rsyslog.conf
     regexp: '^\$FileCreateMode'
     line: '$FileCreateMode 0640'
-  with_items:
-    - '/etc/rsyslog.conf'
-    - '{{ rsyslog_files.stdout_lines }}'
   notify: restart rsyslog
-  when: filecreate_exists == 0 and syslog_package == "rsyslog"
+  when: syslog_package == "rsyslog"
 
 - name: 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host (Scored)
   command: grep "^*.*[^I][^I]*@" /etc/rsyslog.conf
@@ -356,18 +339,10 @@
   when: moadloadpresent.rc == 1 and syslog_package == "rsyslog" and log_host == "enabled"
 
 - name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
-  command: dpkg-query -s syslog-ng
-  register: syslognginstalled
-  changed_when: False
-  failed_when: False
-  check_mode: no
-  when: syslog_package == "syslog-ng"
-
-- name: 4.2.2.1 Ensure syslog-ng service is enabled (Scored)
   service:
     name: syslog-ng
     enabled: yes
-  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  when: syslog_package == "syslog-ng"
 
 - name: 4.2.2.2 Ensure logging is configured (Not Scored)
   lineinfile:
@@ -393,7 +368,7 @@
     - 'log { source(src); source(chroots); filter(f_iptables); destination(firewall); };'
     - 'log { source(src); source(chroots); filter(f_warn); destination(warn); };'
   changed_when: False
-  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  when: syslog_package == "syslog-ng"
   notify: restart syslog-ng
 
 - name: 4.2.2.3 Ensure syslog-ng default file permissions configured (Scored)
@@ -401,7 +376,7 @@
     path: /etc/syslog-ng/syslog-ng.conf
     regexp: '^options'
     line: 'options { chain_hostnames(off); flush_lines(0); perm(0640); stats_freq(3600); threaded(yes); };'
-  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  when: syslog_package == "syslog-ng"
   notify: restart syslog-ng
 
 - name: 4.2.2.4 Ensure syslog-ng is configured to send logs to a remote log host (Scored)
@@ -409,7 +384,7 @@
     path: /etc/syslog-ng/syslog-ng.conf
     regexp: '^destination'
     line: 'destination logserver { tcp(" logfile.example.com " port(514)); }; log { source(src); destination(logserver); };'
-  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  when: syslog_package == "syslog-ng"
   notify: restart syslog-ng
 
 - name: 4.2.2.5 Ensure remote syslog-ng messages are only accepted on designated log hosts (Not Scored)
@@ -421,7 +396,7 @@
     - 'source net{ tcp(); };'
     - 'destination remote { file("/var/log/remote/${FULLHOST}-log"); };'
     - 'log { source(net); destination(remote); };'
-  when: syslognginstalled.rc == 0 and syslog_package == "syslog-ng"
+  when: syslog_package == "syslog-ng"
   notify: restart syslog-ng
 
 - name: 4.2.4 Ensure permissions on all logfiles are configured (Scored)
