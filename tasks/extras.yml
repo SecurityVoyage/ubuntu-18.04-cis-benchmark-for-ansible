@@ -11,4 +11,4 @@
     path: /etc/shadow-
     mode: 0400
     owner: root
-    group: root
+    group: shadow
