@@ -35,3 +35,4 @@ sudo nano roles/ubuntu-18.04-cis-benchmark-for-ansible/defaults/main.yml
 ```
 sudo ansible-playbook -b -i "localhost," -c local playbook.yml
 ```
+
